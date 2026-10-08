@@ -1,7 +1,7 @@
-name: pure_live
+﻿name: pure_live
 description: 若尘直播,一款开源的第三方多平台直播聚合播放器.
 publish_to: none
-version: 3.1.17+4106
+version: 3.1.18+4107
 
 environment:
   sdk: ^3.13.0
@@ -57,30 +57,17 @@ dependencies:
   flutter_spinkit: ^5.2.2
   loading_animation_widget: ^1.3.0
   loading_indicator: ^4.0.2
-  flame_barrage: ^0.0.7
+  # 本地引擎仓库（与下面 F:/media_core 同款绝对路径依赖）：本仓用到了它 0.0.8 上
+  # 新增的宿主撤回接口 `BarrageController.retractWhere`（弹幕撤回要按条撤下已上屏
+  # 的消息），pub.dev 上的 0.0.8 还没有这个接口。
+  flame_barrage: ^0.0.9
 
-  # -------------------------- 音视频播放 --------------------------
-  media_kit:
-    # Predidit/media-kit@803c4a27 vendored: Android and Linux libmpv rebuilt with
-    # mpv 0.41.0 + FFmpeg 9.0.2 (hook/native_bundles.json); no Kazumi option.
-    path: ./third_party/media_kit
-  media_kit_video:
-    path: ./third_party/media_kit_video # Local Android Surface and Windows presentation patches
-
-  better_player_plus:
-    path: plugins/built_in_kotlin/better_player_plus # Local AGP 9 Built‑in Kotlin patch
-
-  audio_service: ^0.18.18 # 后台音频服务
-  audio_service_win: ^0.0.3
-  audio_session: ^0.2.3 # 音频会话管理
   # Keep this exact: 0.6.2 preserves argv through FFmpeg/FFprobe/FFplay.
   # Platform URL overrides below select our verified FFmpeg 9.0.2 bundles;
   # prefetch gates pin the Android and Windows archive hashes.
   ffmpeg_kit_extended_flutter: 0.6.2
   bonsoir: ^7.1.5 # LAN device discovery for settings sync
 
-  flv_lzc:
-    path: plugins/flv_lzc # Vendored from liuchuancong/flv_lzc@030d611
   # -------------------------- UI组件/界面样式 --------------------------
   flutter_svg: ^2.2.1 # SVG图片渲染
   lottie: ^3.6.1 #动画
@@ -91,7 +78,6 @@ dependencies:
   easy_refresh: ^3.5.0 # 下拉刷新/上拉加载
   flutter_smart_dialog: ^5.1.0 # 自定义弹窗
   flex_color_picker: ^4.0.0 # 颜色选择器
-  bordered_text: ^3.0.2 # 带边框文字
   flutter_color: ^2.1.1 # 颜色工具
   syncfusion_flutter_sliders: ^34.2.9 # 滑块组件
   markdown_widget: ^2.3.2+8 # Markdown渲染
@@ -105,11 +91,7 @@ dependencies:
   windows_single_instance: ^1.2.0
   tray_manager: ^0.7.0 # 系统托盘管理
   flutter_acrylic: ^1.1.4 # 亚克力毛玻璃效果
-  screen_retriever:
-    git:
-      url: https://github.com/liuchuancong/screen_retriever.git
-      path: ./packages/screen_retriever
-      ref: b246b3963738d6cc159c921764c194c73dbdf2ad
+  screen_retriever: ^0.2.2
   win32: ^6.3.0 # Windows系统API
   android_intent_plus: ^6.0.0
 
@@ -120,13 +102,110 @@ dependencies:
   screen_brightness_android: ^2.1.6
   screen_brightness_ios: ^2.1.4
   volume_controller: ^3.7.1 # 音量控制
-  wakelock_plus: ^1.4.0 # 保持屏幕常亮
+
   battery_plus: ^7.0.0 # 电池状态获取
   permission_handler: ^13.0.1 # 权限管理
   device_info_plus: ^13.1.0 # 设备信息
 
   mobile_scanner:
-    path: plugins/built_in_kotlin/mobile_scanner # Local AGP 9 Built‑in Kotlin patch
+    path: plugins/built_in_kotlin/mobile_scanner
+
+  # 播放器引擎 (media_kit / media_kit_video / flv_lzc) 不在此声明:
+  # 全部经 media_core 适配包再导出获取, 这里只保留 wakelock_plus
+  # (media_core 未覆盖的独立工具包)。
+  wakelock_plus: ^1.3.3 # 与 media_core_media_kit 的引擎依赖链对齐
+  #
+  # media_core 从本地绝对路径 (F:/media_core/...) 改成 git 依赖, 统一指向
+  # https://github.com/liuchuancong/media_core 的同一个提交 5b04714。换机器、CI 和
+  # 别人 clone 之后都不再依赖本机目录布局。
+  #
+  # 17 个子包共用同一个 url/ref, 只有子目录不同。各写一份 url/ref 迟早会漂移
+  # 成"两个仓库版本混用", 所以这里宁可重复也保持一致。
+  media_core:
+    git:
+      url: https://github.com/liuchuancong/media_core
+      ref: 5b047145422758d983a3724e689d8aa4b7d06863
+      path: packages/media_core
+  media_core_media_kit:
+    git:
+      url: https://github.com/liuchuancong/media_core
+      ref: 5b047145422758d983a3724e689d8aa4b7d06863
+      path: packages/media_core_media_kit
+  media_core_ui:
+    git:
+      url: https://github.com/liuchuancong/media_core
+      ref: 5b047145422758d983a3724e689d8aa4b7d06863
+      path: packages/media_core_ui
+  media_core_pip:
+    git:
+      url: https://github.com/liuchuancong/media_core
+      ref: 5b047145422758d983a3724e689d8aa4b7d06863
+      path: packages/media_core_pip
+  media_core_fullscreen:
+    git:
+      url: https://github.com/liuchuancong/media_core
+      ref: 5b047145422758d983a3724e689d8aa4b7d06863
+      path: packages/media_core_fullscreen
+  media_core_multiview:
+    git:
+      url: https://github.com/liuchuancong/media_core
+      ref: 5b047145422758d983a3724e689d8aa4b7d06863
+      path: packages/media_core_multiview
+  media_core_ingest:
+    git:
+      url: https://github.com/liuchuancong/media_core
+      ref: 5b047145422758d983a3724e689d8aa4b7d06863
+      path: packages/media_core_ingest
+  media_core_presentation:
+    git:
+      url: https://github.com/liuchuancong/media_core
+      ref: 5b047145422758d983a3724e689d8aa4b7d06863
+      path: packages/media_core_presentation
+  media_core_floating:
+    git:
+      url: https://github.com/liuchuancong/media_core
+      ref: 5b047145422758d983a3724e689d8aa4b7d06863
+      path: packages/media_core_floating
+  media_core_list_playback:
+    git:
+      url: https://github.com/liuchuancong/media_core
+      ref: 5b047145422758d983a3724e689d8aa4b7d06863
+      path: packages/media_core_list_playback
+  media_core_feed:
+    git:
+      url: https://github.com/liuchuancong/media_core
+      ref: 5b047145422758d983a3724e689d8aa4b7d06863
+      path: packages/media_core_feed
+  media_core_ijk_player:
+    git:
+      url: https://github.com/liuchuancong/media_core
+      ref: 5b047145422758d983a3724e689d8aa4b7d06863
+      path: packages/media_core_ijk_player
+  media_core_better_player:
+    git:
+      url: https://github.com/liuchuancong/media_core
+      ref: 5b047145422758d983a3724e689d8aa4b7d06863
+      path: packages/media_core_better_player
+  media_core_danmaku:
+    git:
+      url: https://github.com/liuchuancong/media_core
+      ref: 5b047145422758d983a3724e689d8aa4b7d06863
+      path: packages/media_core_danmaku
+  media_core_mediasession:
+    git:
+      url: https://github.com/liuchuancong/media_core
+      ref: 5b047145422758d983a3724e689d8aa4b7d06863
+      path: packages/media_core_mediasession
+  media_core_live:
+    git:
+      url: https://github.com/liuchuancong/media_core
+      ref: 5b047145422758d983a3724e689d8aa4b7d06863
+      path: packages/media_core_live
+  media_core_logging:
+    git:
+      url: https://github.com/liuchuancong/media_core
+      ref: 5b047145422758d983a3724e689d8aa4b7d06863
+      path: packages/media_core_logging
 
   # -------------------------- 数据存储/数据库 --------------------------
   hive_ce: ^2.20.0 # Hive本地数据库
@@ -181,27 +260,17 @@ dependencies:
   package_info_plus: ^10.1.0 # 应用包信息
   stop_watch_timer: ^3.2.2 # 计时器
 
-  floating:
-    path: plugins/built_in_kotlin/floating # Local AGP 9 Built‑in Kotlin patch
-
-  flutter_floating: ^2.0.1 # 悬浮窗
   qr: ^4.0.0 # Bilibili 登录二维码矩阵；绘制由应用控制
   easy_localization: ^3.0.8 #多语言
   app_links: ^7.2.1
   scroll_animator: 0.3.0
-  fvp:
-    # wang-bin/fvp 0.38.1 vendored with Android/iOS plugin platforms only, so
-    # desktop bundles libmpv alone (no libmdk, no fvp#402 disposal hang).
-    path: ./third_party/fvp
+
 
 # 依赖覆盖（强制指定版本）
 dependency_overrides:
-  media_kit:
-    path: ./third_party/media_kit
-  fvp:
-    path: ./third_party/fvp
-  # Keep the full dependency graph at current stable releases while upstream
-  # packages and Flutter SDK pins are migrated and regression-tested here.
+  # media_kit 链与 better_player_plus 对 wakelock_plus 的约束无交集,
+  # 与 media_core 工作区同样以 override 对齐
+  wakelock_plus: ^1.7.0
   _fe_analyzer_shared: 108.0.0
   analyzer: 14.4.0
   cli_util: 0.6.0
@@ -217,13 +286,8 @@ dependency_overrides:
     path: plugins/built_in_kotlin/share_handler_android # share_handler Android本地兼容补丁
   hooks: ^2.2.0 # Native Assets 构建 hooks 兼容
   code_assets: ^2.1.0 # media_kit Native Assets 2 and FFmpeg hook compatibility
-  xml: ^7.0.1 # webdav_client xml7兼容
-  wakelock_plus: ^1.4.0 # media_kit声明版本覆盖
-  screen_retriever:
-    git:
-      url: https://github.com/liuchuancong/screen_retriever.git
-      path: ./packages/screen_retriever
-      ref: b246b3963738d6cc159c921764c194c73dbdf2ad
+  xml: ^7.0.1 # webdav_client xml7兼容盖
+
 
 # 开发依赖
 dev_dependencies:
@@ -264,6 +328,7 @@ flutter:
   uses-material-design: true
   assets:
     - assets/
+    - assets/shaders/
     - assets/images/
     - assets/images/video/
     - assets/icons/
@@ -286,14 +351,11 @@ flutter:
     - family: CustomIcons
       fonts:
         - asset: assets/icons/CustomIcons.ttf
-
+    - family: MI_Sans_Regular
+      fonts:
+        - asset: assets/fonts/MiSans-Regular.ttf
 # FFmpeg配置
 ffmpeg_kit_extended_config:
   type: base
   gpl: false
   small: false
-  android: E:/PureLive/build-tools/ffmpeg/bundle-base-shared-lgpl-release.aar
-  windows: E:/PureLive/build-tools/ffmpeg/bundle-base-windows-x86_64-shared-lgpl.zip
-  linux: https://github.com/wzgrx/pure_live/releases/download/native-ffmpeg-9.0.2-b1/bundle-base-linux-x86_64-shared-lgpl.zip
-  macos: https://github.com/wzgrx/pure_live/releases/download/native-ffmpeg-9.0.2-b1/bundle-base-macos-universal-lgpl.xcframework.zip
-  ios: https://github.com/wzgrx/pure_live/releases/download/native-ffmpeg-9.0.2-b1/bundle-base-ios-universal-lgpl.xcframework.zip
